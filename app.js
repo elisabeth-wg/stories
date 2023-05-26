@@ -1,5 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
+const morgan = require('morgan')
+const exphbs = require('express-handlebars')
 const connectDB = require('./config/db')
 
 // Load config
@@ -9,7 +11,23 @@ connectDB()
 
 const app = express()
 
-const PORT = process.env.PORT || 8500
+//Logging
+if (process.env.Node_ENV === 'development') {
+    app.use(morgan('dev'))
+}
 
+//Handlebars
+//!Add the word .engine after exphbs as below
+app.engine('.hbs', exphbs.engine({
+    defaultLayout: 'main',
+    extname: '.hbs'
+    })
+)
+app.set('view engine', '.hbs')
+
+//Routes
+app.use('/', require('./routes/index'))
+
+const PORT = process.env.PORT || 8500
 
 app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`))
