@@ -1,23 +1,29 @@
+const path = require('path')
 const express = require('express')
 const dotenv = require('dotenv')
 const morgan = require('morgan')
 const exphbs = require('express-handlebars')
+const passport = require('passport')
+const session = require('express-session')
 const connectDB = require('./config/db')
 
 // Load config
-dotenv.config({ path: './config/config.env'})
+dotenv.config({ path: './config/config.env' })
+
+// Passport config
+require('./config/passport')(passport)
 
 connectDB()
 
 const app = express()
 
-//Logging
-if (process.env.Node_ENV === 'development') {
+// Logging
+if(process.env.Node_ENV === 'development') {
     app.use(morgan('dev'))
 }
 
-//Handlebars
-//!Add the word .engine after exphbs as below
+// Handlebars
+// !Add the word .engine after exphbs as below
 app.engine('.hbs', exphbs.engine({
     defaultLayout: 'main',
     extname: '.hbs'
@@ -25,8 +31,27 @@ app.engine('.hbs', exphbs.engine({
 )
 app.set('view engine', '.hbs')
 
-//Routes
+// Sessions middleware
+app.use(
+    session({
+        secret: 'keyboard cat',
+        resave: false,
+        saveUninitialized: false,
+    })
+)
+
+
+// Passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
+
+// Static Folder
+app.use(express.static(path.join(__dirname, 'public')))
+
+
+// Routes
 app.use('/', require('./routes/index'))
+app.use('/auth', require('./routes/auth'))
 
 const PORT = process.env.PORT || 8500
 
