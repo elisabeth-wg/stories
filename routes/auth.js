@@ -20,7 +20,7 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 //This part is different from Traversy do to avoiding middleman attacks by now using async logout
 
 router.get('/logout', (req, res, next) => {
-    req.logout(function (err) {
+    req.logout(function(err) {
         if (err) { return next(err) }
         res.redirect('/')
     })
